@@ -2,10 +2,10 @@
 
 This is the implementation of the inverted deep PID algorithm found in the article: 
 
-"An adaptive deep reinforcement learning approach for
-MIMO PID control of mobile robots"    
+**"An adaptive deep reinforcement learning approach for
+MIMO PID control of mobile robots"**    
 
-submitted to ISA Transactions, currently *under review*.  
+submitted to ***ISA Transactions***, currently *under review*.  
 
 
 ### This repo contains: 
