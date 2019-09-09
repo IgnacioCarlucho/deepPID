@@ -38,7 +38,7 @@ python main.py --alg iddpg --gpu gpu --epochs 1000
 The alg argument selects with which algoritm to train the agent, iddpg or it3. 
 Results on the real robot can be obtained such as: 
 
-![alt text](https://github.com/IgnacioCarlucho/deepPID/blob/master/figs/screen.png)
+![alt text](https://github.com/IgnacioCarlucho/deepPID/blob/master/figs/DPID_spchangevelocity.png)
 
 
 ## DDPG demos
