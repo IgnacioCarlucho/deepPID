@@ -113,7 +113,7 @@ class TD3(object):
         saver = tf.train.Saver()
         return v_1, v_2, a, scaled_a, saver
 
-    def train(self, s_batch, a_batch, r_batch, t_batch, s2_batch, MINIBATCH_SIZE):
+    def train_normal(self, s_batch, a_batch, r_batch, t_batch, s2_batch, MINIBATCH_SIZE):
         
         
         # get q target
@@ -135,7 +135,7 @@ class TD3(object):
 
         return
 
-    def test_gradient(self, s_batch, a_batch, r_batch, t_batch, s2_batch, MINIBATCH_SIZE):
+    def train(self, s_batch, a_batch, r_batch, t_batch, s2_batch, MINIBATCH_SIZE):
         
         
         # get q target
@@ -321,8 +321,8 @@ if __name__ == '__main__':
                 episode_r = episode_r + reward
                 if replay_buffer.size() > MINIBATCH_SIZE + FILL:
                     s_batch, a_batch, r_batch, t_batch, s2_batch = replay_buffer.sample_batch(MINIBATCH_SIZE)
-                    #low.train(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
-                    low.test_gradient(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
+                    low.train(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
+                    #low.train_normal(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
                 else: 
                     epsilon  = 1.
             print(i, step, 'last r', round(reward,3), 'episode reward',round(episode_r,3), 'epsilon', round(epsilon,3))                

@@ -32,15 +32,14 @@ Have in mind that the Pioneer simulator speeds up the simulation time, so you wi
 To run the Deep PID with the pioneer with the inverted gradient:
 
 ```
-python main.py --gpu gpu --epochs 1000
+python main.py --alg iddpg --gpu gpu --epochs 1000
 ```
 
+The alg argument selects with which algoritm to train the agent, iddpg or it3. 
+Results on the real robot can be obtained such as: 
 
-with arguments you can run it on the real robot: 
+![alt text](https://github.com/IgnacioCarlucho/deepPID/blob/master/figs/screen.png)
 
-```
-python main.py --simulation False
-```
 
 ## DDPG demos
 

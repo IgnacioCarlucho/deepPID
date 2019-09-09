@@ -9,7 +9,7 @@ LAYER_3 = 300
 keep_rate = 0.8
 LAMBDA = 0.00001 # regularization term
 GAMMA = 0.99
-class DDPG(object):
+class IDDPG(object):
 
 
     def __init__(self, sess, state_dim, action_dim, max_action, min_action, actor_learning_rate, critic_learning_rate, tau, RANDOM_SEED, device = '/cpu:0'):
@@ -107,28 +107,6 @@ class DDPG(object):
         return v, a, scaled_a, saver
 
     def train(self, s_batch, a_batch, r_batch, t_batch, s2_batch, MINIBATCH_SIZE):
-        
-        
-        # get q target
-        target_q = self.critic_predict_target(s2_batch, self.predict_action_target(s2_batch))
-        # obtain y
-        y_i = []
-        for k in range(MINIBATCH_SIZE):
-            if t_batch[k]:
-                y_i.append(r_batch[k])
-            else:
-                y_i.append(r_batch[k] + GAMMA * target_q[k])
-        # train critic
-        LOSS = self.critic_train(s_batch, a_batch, np.reshape(y_i, (MINIBATCH_SIZE, 1)))
-        # print(L2_LOSS)
-        a_outs = self.predict_action(s_batch)
-        self.actor_train(s_batch, a_outs)
-        
-        self.update_target_network()
-
-        return
-
-    def test_gradient(self, s_batch, a_batch, r_batch, t_batch, s2_batch, MINIBATCH_SIZE):
         
         
         # get q target
@@ -314,8 +292,8 @@ if __name__ == '__main__':
                 episode_r = episode_r + reward
                 if replay_buffer.size() > MINIBATCH_SIZE:
                     s_batch, a_batch, r_batch, t_batch, s2_batch = replay_buffer.sample_batch(MINIBATCH_SIZE)
-                    #low.train(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
-                    low.test_gradient(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
+                    low.train(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
+                   
             print(i, step, 'last r', round(reward,3), 'episode reward',round(episode_r,3), 'epsilon', round(epsilon,3))                
 
 

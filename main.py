@@ -2,7 +2,8 @@ from replay_buffer import ReplayBuffer
 import tensorflow as tf
 import numpy as np
 from ou_noise import OUNoise   
-from ddpg import DDPG
+from iddpg import IDDPG
+from td3 import TD3
 from robots import pioneer_pi
 # if in windows
 # import matplotlib
@@ -20,6 +21,7 @@ TAU = 0.001
 
 parser = argparse.ArgumentParser('deepid')
 parser.add_argument('--gpu', type=str, choices=['gpu', 'cpu'], default='cpu')
+parser.add_argument('--alg', type=str, choices=['iddpg', 'ddpg', 'itd3'], default='iddpg')
 parser.add_argument('--epochs', type=int, default=500)
 parser.add_argument('--sim', type=int, default=100)
 parser.add_argument('--epsilon', type=float, default=1.)
@@ -27,7 +29,7 @@ parser.add_argument("--train", type=str2bool, nargs='?', const=True, default=Tru
 parser.add_argument("--img", type=str2bool, nargs='?', const=True, default=True, help="Activate save image.")
 parser.add_argument("--reset", type=str2bool, nargs='?', const=True, default=True, help="resets after each episode.")
 parser.add_argument("--simulation", type=str2bool, nargs='?', const=True, default=True, help="Is this run on gazebo or in the real vehicel.")
-parser.add_argument("--load", type=str2bool, nargs='?', const=True, default=True, help="Loads policy.")
+parser.add_argument("--load", type=str2bool, nargs='?', const=True, default=False, help="Loads policy.")
 parser.add_argument('--epsilon_decay', type=float, default=0.0002)
 parser.add_argument('--psi', type=float, default=1.)
 parser.add_argument('--pid', type=str, choices=['pid', 'pi'], default='pi')
@@ -39,7 +41,7 @@ args = parser.parse_args()
 
 
 
-
+alg = args.alg
 DEVICE = args.gpu
 max_action = args.max_action
 min_action = args.min_action
@@ -62,7 +64,14 @@ with tf.Session() as sess:
     state_dim = 20 + 2 +4
     action_dim = 4
     robot = pioneer_pi("pioneer", n_actions=action_dim,save_image=False, dt=0.1, Teval = 1, simulation=args.simulation,reset=args.reset, ep_length = args.sim)  
-    low = DDPG(sess, state_dim, action_dim, max_action, min_action, ACTOR_LEARNING_RATE,CRITIC_LEARNING_RATE, TAU, RANDOM_SEED, device=DEVICE)
+    if alg == 'iddpg':
+        low = IDDPG(sess, state_dim, action_dim, max_action, min_action, ACTOR_LEARNING_RATE,CRITIC_LEARNING_RATE, TAU, RANDOM_SEED, device=DEVICE)
+    elif  alg == 'itd3':   
+        low = TD3(sess, state_dim, action_dim, max_action, min_action, ACTOR_LEARNING_RATE,CRITIC_LEARNING_RATE, TAU, RANDOM_SEED, device=DEVICE)
+    else:
+        raise NotImplementedError    
+
+
     sess.run(tf.global_variables_initializer())
     if args.load:
         low.load()
@@ -105,7 +114,7 @@ with tf.Session() as sess:
             action = np.clip(action,min_action,max_action)
             action = action + max(4.*epsilon,0)*ruido.noise()
             action = np.clip(action,min_action,max_action)
-           
+            
             
             new_position, new_velocities, u = robot.run(action)   
             # this should all go to the robot.run 
@@ -137,8 +146,8 @@ with tf.Session() as sess:
             episode_r = episode_r + reward
             if replay_buffer.size() > MINIBATCH_SIZE:
                 s_batch, a_batch, r_batch, t_batch, s2_batch = replay_buffer.sample_batch(MINIBATCH_SIZE)
-                #low.train(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
-                low.test_gradient(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
+                low.train(s_batch, a_batch, r_batch, t_batch, s2_batch,MINIBATCH_SIZE)
+
         print(i, step, 'last r', round(reward,3), 'epsilon', round(epsilon,3),'episode reward','**',round(episode_r,3),'**' )                
         print('req', velocity_req, 'last v', np.round(new_velocities[9],3))
         ruido.reset()
