@@ -35,11 +35,13 @@ To run the Deep PID with the pioneer with the inverted gradient:
 python main.py --alg iddpg --gpu gpu --epochs 1000
 ```
 
-The alg argument selects with which algoritm to train the agent, iddpg or it3. 
+The alg argument selects with which algoritm to train the agent, iddpg or it3.   
 Results on the real robot can be obtained such as: 
 
 ![alt text](https://github.com/IgnacioCarlucho/deepPID/blob/master/figs/DPID_spchangevelocity.png)
 
+
+The algorithm periodically saves the actions and velocities obtained every x number of epochs, this number can be changed by using the argument *save_mod*. The neural networks are saved automatically after the max number of epochs is achieved. 
 
 ## DDPG demos
 
